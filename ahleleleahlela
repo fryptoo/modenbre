@@ -1,0 +1,88 @@
+org.gradle.jvmargs=-Xmx2G
+org.gradle.parallel=true
+org.gradle.configuration-cache=false
+
+# Fabric properties. Confirm at https://fabricmc.net/develop
+minecraft_version=1.21.11
+loader_version=0.18.4
+loom_version=1.15-SNAPSHOT
+fabric_api_version=0.141.1+1.21.11
+
+# Mod properties
+mod_version=1.0.0
+maven_group=com.example
+archives_base_name=rocketcounter
+
+Rocket Counter (Fabric client mod, Minecraft 1.21.11)
+
+Shows a list in the top-left corner of every nearby player holding firework
+rockets, with the stack size and an "(elytra)" tag if they wear one.
+
+EASIEST WAY TO GET THE JAR (no Java or Gradle on your PC):
+1. Make a free GitHub account and create a new repository.
+2. Upload everything in this folder to it (including the hidden .github folder).
+3. Open the repo's "Actions" tab and wait for "Build mod jar" to finish (~2 min).
+4. Open that run and download the "rocketcounter-jar" artifact. Unzip it:
+   rocketcounter-1.0.0.jar is your mod.
+5. Put that jar and Fabric API in your .minecraft/mods folder
+   (Fabric Loader installed for 1.21.11). Client only; servers don't need it.
+
+If the build fails, open the failed run, copy the error and send it to me.
+
+BUILDING LOCALLY INSTEAD:
+JDK 21, then "gradle build" (or copy the Gradle wrapper from the
+fabric-example-mod repo, 1.21.11 branch, and run ./gradlew build).
+The jar ends up in build/libs/.
+
+Check the versions in gradle.properties against https://fabricmc.net/develop
+
+pluginManagement {
+	repositories {
+		maven { name = 'Fabric'; url = 'https://maven.fabricmc.net/' }
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}
+
+.gradle/
+build/
+run/
+.idea/
+*.iml
+
+plugins {
+	id 'fabric-loom' version "${loom_version}"
+	id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	// 1.21.11 is still obfuscated; Yarn is discontinued, so use Mojang's names.
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+processResources {
+	inputs.property "version", project.version
+	filesMatching("fabric.mod.json") {
+		expand "version": inputs.properties.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21
+}
+
+java {
+	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
